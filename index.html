@@ -85,33 +85,71 @@ Aradaki Elemanlar: Kalan boşluğu kendi aralarında eşit miktarda paylaşır.*
             </div>
             <table class="details-table">
                 <tr>
-                    <td>Diamand</td>
+                    <td>Diamond</td>
                     <td class="colon">:</td>
-                    <td>0.51 ct.</td>
+                    <td id="val-karat">0.51 ct.</td>
                 </tr>
                 <tr>
                     <td>Color</td>
                     <td class="colon">:</td>
-                    <td>E</td>
+                    <td id="val-renk">E</td>
                 </tr>
                 <tr>
                     <td>Clarity</td>
                     <td class="colon">:</td>
-                    <td>VS</td>
+                    <td id="val-berraklik">VS</td>
                 </tr>
                 <tr>
                     <td>Gold</td>
                     <td class="colon">:</td>
-                    <td>14K</td>
+                    <td id="val-altin">14K</td>
                 </tr>
                 <tr>
                     <td>Gram</td>
                     <td class="colon">:</td>
-                    <td>1.77 gr.</td>
+                    <td id="val-gram">1.77 gr.</td>
                 </tr>
             </table>
          </div>
      </div>
     </div>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+(function () {                                          // her şeyi güvenli bir kutuya al, çakışma olmasın
+  const SUPABASE_URL = "https://qmyrpykooipxyfwaepyz.supabase.co";   // veritabanının adresi
+  const SUPABASE_KEY = "sb_publishable_jqpVe_hmhbkPOpZ8TIVCfw_P-qkIjyO";           // veritabanına giriş anahtarı
+
+  const sertifikaDb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);  // veritabanına bağlan
+
+  async function sertifikayiGetir() {                    // "sertifika getir" adında bir görev tanımla
+    const id = new URLSearchParams(window.location.search).get("id");  // linkteki ?id=... kodunu oku
+    const durum = document.getElementById("durum");       // uyarı mesajı yazılacak alanı bul
+
+    if (!id) {                                            // eğer linkte id yoksa
+      durum.textContent = "Linkte sertifika kodu bulunamadı.";  // uyarı yaz
+      return;                                             // ve dur, devam etme
+    }
+
+    const { data, error } = await sertifikaDb             // veritabanına sor:
+      .from("sertifikalar")                               // "sertifikalar" tablosuna bak
+      .select("*")                                        // her sütunu getir
+      .eq("id", id)                                       // ama sadece id'si eşleşen satırı
+      .single();                                          // tek sonuç bekliyorum
+
+    if (error || !data) {                                 // eğer hata varsa veya veri bulunamadıysa
+      durum.textContent = "Bu koda ait sertifika bulunamadı.";  // uyarı yaz
+      return;                                             // ve dur
+    }
+
+    document.getElementById("val-karat").textContent = data.karat;          // karat bilgisini yaz
+    document.getElementById("val-renk").textContent = data.renk;            // renk bilgisini yaz
+    document.getElementById("val-berraklik").textContent = data.berraklik;  // berraklık bilgisini yaz
+    document.getElementById("val-altin").textContent = data.altin;         // altın ayarını yaz
+    document.getElementById("val-gram").textContent = data.gram;           // gram bilgisini yaz
+  }                                                        
+  sertifikayiGetir();                                      // görevi şimdi çalıştır
+})();                                                     
+</script>
+
 </body>
 </html>
